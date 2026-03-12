@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos Digitales - Admin</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      header {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: #333;
+        font-size: 2em;
+      }
+
+      /* Panel de Admin */
+      .admin-panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .admin-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 600;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .form-group textarea {
+        height: 100px;
+        resize: vertical;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+        margin-left: 10px;
+      }
+
+      /* Grid de Productos */
+      .productos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .producto-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s;
+        position: relative;
+      }
+
+      .producto-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .producto-imagen {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 14px;
+      }
+
+      .producto-info {
+        padding: 20px;
+      }
+
+      .producto-titulo {
+        font-size: 1.3em;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .producto-descripcion {
+        color: #666;
+        margin-bottom: 15px;
+        line-height: 1.6;
+      }
+
+      .producto-precio {
+        font-size: 1.5em;
+        color: #667eea;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .producto-enlace {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        width: 100%;
+        text-align: center;
+        transition: all 0.3s;
+        font-weight: 600;
+      }
+
+      .producto-enlace:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .admin-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 5px;
+      }
+
+      .admin-btn {
+        background: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .admin-btn.edit {
+        background: #4299e1;
+        color: white;
+      }
+
+      .admin-btn.delete {
+        background: #f56565;
+        color: white;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .modal-content h3 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      /* Utilidades */
+      .text-center {
+        text-align: center;
+      }
+
+      .mt-4 {
+        margin-top: 20px;
+      }
+
+      .productos-count {
+        color: white;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 50px;
+        background: white;
+        border-radius: 10px;
+        color: #999;
+      }
+
+      /* Layout con Sidebar (Publicidad) */
+      .main-layout {
+        display: flex;
+        gap: 25px;
+        align-items: flex-start;
+      }
+
+      .products-column {
+        flex: 1; /* Ocupa el espacio disponible */
+      }
+
+      .sidebar-column {
+        width: 320px;
+        flex-shrink: 0;
+      }
+
+      .ad-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        position: sticky; /* Se queda fija al hacer scroll */
+        top: 20px;
+        border-top: 5px solid #764ba2;
+      }
+
+      .ad-card h3 {
+        color: #333;
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      .ad-card p, .ad-card li {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+        font-size: 0.95em;
+      }
+
+      .ad-card ul {
+        list-style: none;
+      }
+
+      @media (max-width: 900px) {
+        .main-layout {
+          flex-direction: column;
+        }
+        .sidebar-column {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📦 Productos Digitales</h1>
+        <p>Panel de Administración</p>
+      </header>
+
+      <!-- Acceso Admin -->
+      <div id="loginSection" class="text-center" style="margin-bottom: 20px">
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+          "
+        >
+          <input
+            type="password"
+            id="adminPassword"
+            placeholder="Contraseña"
+            style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px"
+          />
+          <button onclick="iniciarSesionAdmin()" class="btn">🔓 Entrar</button>
+        </div>
+      </div>
+
+      <!-- Panel de Administración -->
+      <div class="admin-panel" id="adminPanel" style="display: none">
+        <h2>➕ Agregar Nuevo Producto</h2>
+        <form id="productoForm">
+          <div class="form-group">
+            <label for="titulo">Título del Producto:</label>
+            <input
+              type="text"
+              id="titulo"
+              placeholder="Ej: Curso de Photoshop"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="descripcion">Descripción:</label>
+            <textarea
+              id="descripcion"
+              placeholder="Describe tu producto..."
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="precio">Precio:</label>
+            <input
+              type="number"
+              id="precio"
+              placeholder="29.99"
+              step="0.01"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="imagenArchivo">Subir Imagen (Archivo):</label>
+            <input type="file" id="imagenArchivo" accept="image/*" />
+          </div>
+          <div class="form-group">
+            <label for="enlaceCompra">Enlace de Compra:</label>
+            <input
+              type="url"
+              id="enlaceCompra"
+              placeholder="https://tienda.com/comprar"
+              required
+            />
+          </div>
+          <button type="submit" class="btn">Agregar Producto</button>
+        </form>
+      </div>
+
+      <div class="main-layout">
+        <!-- Columna Izquierda: Productos -->
+        <div class="products-column">
+          <div class="productos-count" id="productosCount">
+            Cargando productos...
+          </div>
+          <div class="productos-grid" id="productosGrid">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Publicidad -->
+        <aside class="sidebar-column">
+          <div class="ad-card">
+            <h3>✨ ¡Descubre la tarjeta que impulsa tu mundo digital! ✨</h3>
+            <p>Con nuestra tarjeta exclusiva podrás:</p>
+            <ul>
+              <li>💳 Comprar y vender productos digitales de manera segura.</li>
+              <li>🚀 Acceder a beneficios únicos para emprendedores y creadores.</li>
+              <li>🌐 Conectar con la plataforma líder en educación y negocios online.</li>
+              <li>🎁 Disfrutar de promociones especiales y recompensas por tu fidelidad.</li>
+            </ul>
+            <p class="mt-4"><strong>👉 Tu puerta de entrada al éxito digital está aquí.</strong></p>
+            <p>Solicítala hoy y comienza a transformar tus ideas en ingresos.</p>
+            <a href="https://go.hotmart.com/N104862297B" target="_blank" class="producto-enlace" style="margin-top: 15px;">Solicítala hoy</a>
+            <p style="margin-top: 10px; font-size: 0.95em;">y comienza a transformar tus ideas en ingresos.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Modal de Edición -->
+    <div class="modal" id="editModal">
+      <div class="modal-content">
+        <h3>✏️ Editar Producto</h3>
+        <form id="editForm">
+          <input type="hidden" id="editId" />
+          <div class="form-group">
+            <label for="editTitulo">Título:</label>
+            <input type="text" id="editTitulo" required />
+          </div>
+          <div class="form-group">
+            <label for="editDescripcion">Descripción:</label>
+            <textarea id="editDescripcion" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editPrecio">Precio:</label>
+            <input type="number" id="editPrecio" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label for="editImagenArchivo">Cambiar Imagen (Opcional):</label>
+            <input type="file" id="editImagenArchivo" accept="image/*" />
+          </div>
+          <div class="form-group">
+            <label for="editEnlaceCompra">Enlace de Compra:</label>
+            <input type="url" id="editEnlaceCompra" required />
+          </div>
+          <button type="submit" class="btn">Guardar Cambios</button>
+          <button type="button" class="btn btn-danger" onclick="cerrarModal()">
+            Cancelar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Productos iniciales (demo)
+      let esAdmin = false;
+      let productos = [
+        {
+          id: 1,
+          titulo: "Curso de Desarrollo Web",
+          descripcion:
+            "Aprende HTML, CSS y JavaScript desde cero. Incluye proyectos prácticos.",
+          precio: 49.99,
+          imagen:
+            "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=500",
+          enlaceCompra: "https://ejemplo.com/comprar/1",
+        },
+        {
+          id: 2,
+          titulo: "Ebook de Marketing Digital",
+          descripcion:
+            "Guía completa para dominar el marketing en redes sociales y SEO.",
+          precio: 19.99,
+          imagen:
+            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500",
+          enlaceCompra: "https://ejemplo.com/comprar/2",
+        },
+      ];
+
+      // Función de login
+      function iniciarSesionAdmin() {
+        const password = document.getElementById("adminPassword").value.trim();
+        if (password === "Daewocielo1") {
+          esAdmin = true;
+          document.getElementById("adminPanel").style.display = "block";
+          document.getElementById("loginSection").style.display = "none";
+          renderizarProductos(); // Actualizar para mostrar botones de editar/borrar
+          alert("Bienvenido Administrador");
+        } else {
+          alert("Contraseña incorrecta");
+        }
+      }
+
+      // Permitir login presionando Enter
+      document
+        .getElementById("adminPassword")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            iniciarSesionAdmin();
+          }
+        });
+
+      // Cargar productos del localStorage al iniciar
+      function cargarProductos() {
+        const productosGuardados = localStorage.getItem("productos");
+        if (productosGuardados) {
+          productos = JSON.parse(productosGuardados);
+        }
+        renderizarProductos();
+      }
+
+      // Guardar productos en localStorage
+      function guardarProductos() {
+        localStorage.setItem("productos", JSON.stringify(productos));
+        renderizarProductos();
+      }
+
+      // Renderizar productos en la grid
+      function renderizarProductos() {
+        const grid = document.getElementById("productosGrid");
+        const countElement = document.getElementById("productosCount");
+
+        if (productos.length === 0) {
+          grid.innerHTML =
+            '<div class="empty-state">No hay productos disponibles. ¡Agrega tu primer producto!</div>';
+          countElement.textContent = "0 productos disponibles";
+          return;
+        }
+
+        countElement.textContent = `${productos.length} producto${productos.length !== 1 ? "s" : ""} disponible${productos.length !== 1 ? "s" : ""}`;
+
+        grid.innerHTML = productos
+          .map(
+            (producto) => `
+                <div class="producto-card">
+                    ${
+                      esAdmin
+                        ? `<div class="admin-controls">
+                        <button class="admin-btn edit" onclick="editarProducto(${producto.id})">✏️</button>
+                        <button class="admin-btn delete" onclick="eliminarProducto(${producto.id})">🗑️</button>
+                    </div>`
+                        : ""
+                    }
+                    <img src="${producto.imagen || "https://via.placeholder.com/300x200?text=Sin+Imagen"}" 
+                         alt="${producto.titulo}" 
+                         class="producto-imagen"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Imagen+no+disponible'">
+                    <div class="producto-info">
+                        <h3 class="producto-titulo">${producto.titulo}</h3>
+                        <p class="producto-descripcion">${producto.descripcion}</p>
+                        <p class="producto-precio">$${producto.precio}</p>
+                        <a href="${producto.enlaceCompra}" target="_blank" class="producto-enlace">Comprar Ahora</a>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // Función auxiliar para leer archivo como Base64
+      const leerArchivo = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      };
+
+      // Agregar nuevo producto
+      document
+        .getElementById("productoForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const titulo = document.getElementById("titulo").value;
+          const archivoInput = document.getElementById("imagenArchivo");
+
+          let imagenFinal = `https://image.pollinations.ai/prompt/${encodeURIComponent(titulo)}?width=400&height=200&nologo=true`;
+          if (archivoInput.files && archivoInput.files[0]) {
+            imagenFinal = await leerArchivo(archivoInput.files[0]);
+          }
+
+          const nuevoProducto = {
+            id: Date.now(),
+            titulo: titulo,
+            descripcion: document.getElementById("descripcion").value,
+            precio: parseFloat(document.getElementById("precio").value),
+            imagen: imagenFinal,
+            enlaceCompra: document.getElementById("enlaceCompra").value,
+          };
+
+          productos.push(nuevoProducto);
+          guardarProductos();
+
+          // Limpiar formulario
+          e.target.reset();
+
+          alert("Producto agregado correctamente");
+        });
+
+      // Eliminar producto
+      window.eliminarProducto = (id) => {
+        if (confirm("¿Estás seguro de eliminar este producto?")) {
+          productos = productos.filter((p) => p.id !== id);
+          guardarProductos();
+        }
+      };
+
+      // Editar producto
+      window.editarProducto = (id) => {
+        const producto = productos.find((p) => p.id === id);
+        if (producto) {
+          document.getElementById("editId").value = producto.id;
+          document.getElementById("editTitulo").value = producto.titulo;
+          document.getElementById("editDescripcion").value =
+            producto.descripcion;
+          document.getElementById("editPrecio").value = producto.precio;
+          document.getElementById("editImagenArchivo").value = ""; // Reset del input file
+          document.getElementById("editEnlaceCompra").value =
+            producto.enlaceCompra;
+
+          document.getElementById("editModal").classList.add("active");
+        }
+      };
+
+      // Cerrar modal
+      window.cerrarModal = () => {
+        document.getElementById("editModal").classList.remove("active");
+      };
+
+      // Guardar edición
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const id = parseInt(document.getElementById("editId").value);
+          const index = productos.findIndex((p) => p.id === id);
+
+          if (index !== -1) {
+            const newTitle = document.getElementById("editTitulo").value;
+            const archivoInput = document.getElementById("editImagenArchivo");
+
+            let nuevaImagen = productos[index].imagen; // Mantiene la anterior por defecto
+            if (archivoInput.files && archivoInput.files[0]) {
+              nuevaImagen = await leerArchivo(archivoInput.files[0]);
+            }
+
+            productos[index] = {
+              id: id,
+              titulo: newTitle,
+              descripcion: document.getElementById("editDescripcion").value,
+              precio: parseFloat(document.getElementById("editPrecio").value),
+              imagen: nuevaImagen,
+              enlaceCompra: document.getElementById("editEnlaceCompra").value,
+            };
+
+            guardarProductos();
+            cerrarModal();
+            alert("Producto actualizado correctamente");
+          }
+        });
+
+      // Cerrar modal al hacer clic fuera
+      window.addEventListener("click", (e) => {
+        const modal = document.getElementById("editModal");
+        if (e.target === modal) {
+          cerrarModal();
+        }
+      });
+
+      // Inicializar
+      cargarProductos();
+    </script>
+  </body>
+</html>
